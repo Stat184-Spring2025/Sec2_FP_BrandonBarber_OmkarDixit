@@ -17,11 +17,9 @@ la_liga<- c(
 )
 
 FIFA_RATING <-
-  FIFA %>%
+  FIFA_RATING %>%
   dplyr::filter(Club %in% la_liga)%>%  
-  dplyr::filter(!is.na(Overall)) %>%  
-  
-  dplyr::select(c("Overall", "Club"))
+  dplyr::filter(!is.na(Overall))
   
 #Calculate average player rating per club
 club_avg_rating <- 
