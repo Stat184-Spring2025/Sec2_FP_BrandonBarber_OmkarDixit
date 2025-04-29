@@ -25,17 +25,17 @@ FIFA_RATING <-
 club_avg_rating <- 
   FIFA_RATING %>%
   group_by(Club) %>%
-  summarize(Average_Overall = round(mean(Overall, na.rm = TRUE), 2)) %>%
+  summarize(`Average Overall` = round(mean(Overall, na.rm = TRUE), 2)) %>%
   arrange(desc(Average_Overall))
 
 #Plot bar chart
-ggplot(club_avg_rating, aes(x = reorder(Club , -Average_Overall), y = Average_Overall)) +
+ggplot(club_avg_rating, aes(x = reorder(Club , -`Average Overall`), y = `Average Overall`)) +
   geom_bar(stat = "identity", fill = "cyan") +
   labs(title = "Average Player Rating in La Liga",
        x = "Club",
        y = "Average Overall") +
   
-  geom_text(aes(label = Average_Overall), vjust = 1.2, size = 1.5) +
+  geom_text(aes(label = `Average Overall`), vjust = 1.2, size = 1.5) +
   
 theme_minimal() +
   theme(axis.text.x = element_text(angle = 55, hjust = 1))
