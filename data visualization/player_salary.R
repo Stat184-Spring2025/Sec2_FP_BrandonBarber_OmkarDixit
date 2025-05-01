@@ -73,7 +73,7 @@ ggplot(value_insight, aes(x= Rank,
                           size = `Club Value (millions)`)) + 
   geom_point() +
   
-  labs(title = "Total Player Values vs Standings") +
+  labs(title = "La Liga 22-23: Total Player Values vs Standings") +
   
   scale_x_continuous(n.breaks = 10)+
   
