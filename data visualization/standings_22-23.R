@@ -7,7 +7,7 @@ library(rvest)
 #STANDINGS <- read_csv("laliga_standings.csv")
 
 url <- "https://www.espn.com/soccer/standings/_/league/ESP.1/season/2022"
-standings <- read_html(url) %>%
+standings_2023 <- read_html(url) %>%
   html_table() %>%
   as.data.frame()
 
@@ -19,19 +19,17 @@ la_liga_2023<- c(
   "RCD Espanyol de Barcelona", "Elche CF"
 )
 
-standings <-
-  standings %>%
+standings_2023 <-
+  standings_2023 %>%
   dplyr::select(1) %>%
   rename(Club = 1) %>%
-
-#import club names that are universal throughout datasets
+  
   mutate(Club = la_liga_2023)%>%
-
-#add a column for rank
-  mutate(Rank = seq(1, nrow(standings)))
+  
+  mutate(Rank = seq(1, nrow(standings_2023)))
 
 #Create Table
- standings <- kable(standings, caption = "Final LaLiga Standings for 2022-23") %>%
+ standings_2023 <- kable(standings_2023, caption = "Final LaLiga Standings for 2022-23") %>%
   kable_styling() %>%
   footnote(general =
              c("MP - Matches Played",
