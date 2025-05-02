@@ -3,6 +3,8 @@ library(kableExtra)
 library(readr)
 library(rvest)
 
+
+
 url <- "https://www.espn.com/soccer/standings/_/league/ESP.1/season/2022"
 standings_2023 <- read_html(url) %>%
   html_table() %>%
@@ -18,24 +20,27 @@ la_liga_2023<- c(
 
 standings_2023 <-
   standings_2023 %>%
-  dplyr::select(1) %>%
+  
   rename(Club = 1) %>%
-
-#use club names universal across datasets
+  
+  #add universal club names from datasets
   mutate(Club = la_liga_2023)%>%
-
-#add end of season rnak column
+  
+  #add season end rank
   mutate(Rank = seq(1, nrow(standings_2023)))
 
-#Create Table
- standings_2023 <- kable(standings_2023, caption = "Final LaLiga Standings for 2022-23") %>%
+standings_2023 <-
+  standings_2023[c(10,1,2,3,4,5,6,7,8,9)]
+
+kable(standings_2023, caption = "Final LaLiga Standings for 2022-23") %>%
   kable_styling() %>%
   footnote(general =
-             c("MP - Matches Played",
+             c("GP - Matches Played",
                "W - Wins",
+               "D - Draws",
                "L - Losses",
-               "GF - Goals For",
-               "GA - Goals Against",
+               "F - Goals For",
+               "A - Goals Against",
                "GD - Goal Differential",
-               "Pts - Points"),
+               "P - Points"),
            general_title = "Legend:")
