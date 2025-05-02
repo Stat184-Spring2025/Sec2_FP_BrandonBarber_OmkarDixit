@@ -3,9 +3,6 @@ library(kableExtra)
 library(readr)
 library(rvest)
 
-#load file
-#STANDINGS <- read_csv("laliga_standings.csv")
-
 url <- "https://www.espn.com/soccer/standings/_/league/ESP.1/season/2022"
 standings_2023 <- read_html(url) %>%
   html_table() %>%
