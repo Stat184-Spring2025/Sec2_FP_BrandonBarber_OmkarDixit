@@ -20,9 +20,11 @@ standings_2023 <-
   standings_2023 %>%
   dplyr::select(1) %>%
   rename(Club = 1) %>%
-  
+
+#use club names universal across datasets
   mutate(Club = la_liga_2023)%>%
-  
+
+#add end of season rnak column
   mutate(Rank = seq(1, nrow(standings_2023)))
 
 #Create Table
