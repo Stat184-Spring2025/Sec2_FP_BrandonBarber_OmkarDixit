@@ -105,7 +105,7 @@ expenditures_names <- liga1_expenditures[[1]]
 final_names <- joint_standings[[1]]  #copy of our output club names
 
 #remove all prefixes and other strings that are unique to each dataset
-prefix <- c("FC", "CF", "RC", "D", "de", "Club", "CA", " ", "LA")
+prefix <- c("FC", "CF", "RCD", "RC", "de", "Club", "CA", " ", "LA")
 
 for (term in prefix){
   standings_names <- str_replace_all(standings_names, term, "")
