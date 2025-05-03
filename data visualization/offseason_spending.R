@@ -1,4 +1,4 @@
-### OFF SEASON SPENDING AND ACADEMIES
+### OFF SEASON SPENDING 
 
 library(readr)
 library(rvest)
@@ -173,7 +173,7 @@ ggplot()+
     y = `Rank 2022`,
     yend = `Rank 2023`),
     
-    arrow = arrow(length = unit(0.17, "cm"), type = "closed"),
+    arrow = arrow(length = unit(0.17, "cm")),
     color = "red"
   ) +
   
