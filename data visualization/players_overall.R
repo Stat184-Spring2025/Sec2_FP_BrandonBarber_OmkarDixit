@@ -1,11 +1,14 @@
-##FIFA OVRALL VISUALIZATION
+##FIFA OVERALL VISUALIZATION
 
 library(dplyr)
 library(tidyr)
 library(readr)
+library(rvest)
+
+##Team Overall
 
 #Load Data
-FIFA_RATING <- read_csv("players_fifa23.csv")
+fifa_rating <- read_csv("players_fifa23.csv")
 
 #Filter for LaLiga PLayers
 la_liga<- c(
@@ -16,26 +19,56 @@ la_liga<- c(
   "RCD Espanyol de Barcelona", "Elche CF"
 )
 
-FIFA_RATING <-
-  FIFA_RATING %>%
+fifa_rating <-
+  fifa_rating %>%
   dplyr::filter(Club %in% la_liga)%>%  
   dplyr::filter(!is.na(Overall))
   
 #Calculate average player rating per club
 club_avg_rating <- 
-  FIFA_RATING %>%
+  fifa_rating %>%
   group_by(Club) %>%
-  summarize(`Average Overall` = round(mean(Overall, na.rm = TRUE), 2)) %>%
+  summarize(Average_Overall = round(mean(Overall, na.rm = TRUE), 2)) %>%
   arrange(desc(Average_Overall))
 
+
+#2022-2023 standings
+
+#load data
+url <- "https://www.espn.com/soccer/standings/_/league/ESP.1/season/2022"
+standings_2023 <- read_html(url) %>%
+  html_table() %>%
+  as.data.frame()
+
+
+standings_2023 <-
+  standings_2023 %>%
+  dplyr::select(1) %>%
+  rename(Club = 1) %>%
+  
+  #add universal club names from datasets
+  mutate(Club = la_liga) %>%
+  
+  #add season ending rank
+  mutate(`Rank 2023` = seq(1, nrow(standings_2023)))
+
+## Join overall with standings
+
+rating_standings <-
+  standings_2023 %>%
+  left_join(club_avg_rating, by = "Club")
+
 #Plot bar chart
-ggplot(club_avg_rating, aes(x = reorder(Club , -`Average Overall`), y = `Average Overall`)) +
-  geom_bar(stat = "identity", fill = "cyan") +
-  labs(title = "Average Player Rating in La Liga",
-       x = "Club",
-       y = "Average Overall") +
+
+ggplot(rating_standings, aes(x = Average_Overall, y = reorder(Club, -`Rank 2023`))) +
   
-  geom_text(aes(label = `Average Overall`), vjust = 1.2, size = 1.5) +
+  geom_point(size = 4, color = "steelblue") +
   
-theme_minimal() +
-  theme(axis.text.x = element_text(angle = 55, hjust = 1))
+  xlim(70,80)+
+  
+  labs(title = "Average Player Rating in La Liga 22/23", x = "Average Overall", y = "Club") +
+  
+  geom_text(aes(label = Average_Overall), hjust = -0.4, size = 3) +
+  
+  theme_minimal()
+
