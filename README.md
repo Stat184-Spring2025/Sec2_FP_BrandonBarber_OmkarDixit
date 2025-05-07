@@ -37,5 +37,5 @@ Be sure to list where you got any data used within the project. Be sure to ackno
 
 ## Authors
 
-Brandon Barber - bfb5559@psu.edu
-Omkar Dixit - omd5155@psu.edu
+Brandon Barber - <bfb5559@psu.edu>
+Omkar Dixit - <omd5155@psu.edu>
