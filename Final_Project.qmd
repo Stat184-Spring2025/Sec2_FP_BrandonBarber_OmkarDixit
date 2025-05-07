@@ -758,7 +758,7 @@ The graph exhibits a clear linear relationship between a club's average FIFA 23 
 
 This positive correlation suggests that FIFA 23 player ratings can reflect the quality of real teams, despite being part of a video game.
 
-#Conclusion
+# Conclusion
 This report examined key factors that can have influence on team success in La Liga, including total player market value, offseason transfer spending, academy player promotions, and FIFA 23 player ratings. The graphs showed a strong linear relationship between both total squad value and average player ratings with a team's final league ranking. Clubs like Barcelona and Real Madrid that ranked highest in both player value and average ratings, also finished at the top of the league. This suggests that roster quality is key in team success. This also showsthat FIFA’s video game ratings may reasonably reflect team strength.
 
 On the other hand, offseason transfer spending alone did not have as strong a correlation with improved performance as academy spending. Some clubs spent large amounts and declined in rank, while others, with lesser investments, improved. In contrast, clubs that promoted more players from their academies showed a pattern of improvement, suggesting that internal development of players can be both cost effective, and can lead to future success. Overall, the visuals indicate that, while financial value and player quality are important to success in La Liga, strategies like youth promotion can provide a meaningful competitive edge.
