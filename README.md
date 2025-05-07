@@ -1,7 +1,6 @@
 # Analysis of the Factors That Contribute to Succes in La Liga
 
-This repo
-
+This repo contains the data, and code for our report on Success in La Liga. Th report discusses which factors have a strong relationship with success in the league, comparing across years and factors. 
 ## Overview
 
 Expand on those introductory sentences with a brief but informative description of your project's purpose and goals. This section should help visitors decide whether they should dig deeper into your repo/project.
@@ -12,7 +11,25 @@ This is optional but highly recommended. You'll include one interesting insight 
 
 ## Repo Structure
 
-Use this section to explain the structure of your repo. This should help visitors quickly figure out where they should look to find certain elements. Further, you can use this space to highlight and briefly explain important/key files in the repo.
+### Data Visualizations (files contain data cleaning and visualization):
+ - academy_promotion.R
+    - Academy Promotions vs Rankings 
+ - offseason_spending.R
+    - Offseason Transfers vs Rankings
+ - player_salary.R
+    - Club Value and Total Player Value compared with Rankings
+ - players_overall.R
+    - Club Average FIFA Rating
+ - standings_21-22.R
+    - La Liga 2021/2022 Final Standings
+ - standings_22-23.R
+    - La Liga 2022/2023 Final Standings
+      
+### Data:
+- La_Liga_Academy_Promotion_22_23.csv
+   - Academy Promotion Data
+- players_fifa23.csv
+   - FIFA Data
 
 ## Data Sources and Acknowledgements
 
@@ -20,4 +37,5 @@ Be sure to list where you got any data used within the project. Be sure to ackno
 
 ## Authors
 
-Give information about who are the authors of the project and how people can get in touch if they have questions.
+Brandon Barber - bfb5559@psu.edu
+Omkar Dixit - omd5155@psu.edu
