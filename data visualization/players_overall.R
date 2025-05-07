@@ -32,7 +32,7 @@ club_avg_rating <-
   arrange(desc(Average_Overall))
 
 
-#2022-2023 standings
+##2022-2023 standings
 
 #load data
 url <- "https://www.espn.com/soccer/standings/_/league/ESP.1/season/2022"
@@ -66,9 +66,8 @@ ggplot(rating_standings, aes(x = Average_Overall, y = reorder(Club, -`Rank 2023`
   
   xlim(70,80)+
   
-  labs(title = "Average Player Rating in La Liga 22/23", x = "Average Overall", y = "Club") +
+  labs(title = "Average Player FIFA Rating - La Liga 22/23", x = "Average Overall", y = "Club") +
   
   geom_text(aes(label = Average_Overall), hjust = -0.4, size = 3) +
   
   theme_minimal()
-
