@@ -3,11 +3,14 @@
 This repo contains the data, and code for our report on Success in La Liga. Th report discusses which factors have a strong relationship with success in the league, comparing across years and factors. 
 ## Overview
 
-Expand on those introductory sentences with a brief but informative description of your project's purpose and goals. This section should help visitors decide whether they should dig deeper into your repo/project.
+This report aims to explore possible factors that lead to team success in the La Liga 2022/2023 season. The questions be focused on are:
 
-### Interesting Insight
+1. Does a club's monetary value share a relation ship with the clubs end of season ranking?
+2. Do teams that purchase players in the offseason perform better or worse than teams who promote players from their youth academies?
+3. Can player ratings in the videogame FIFA 23 be used as predictors for team success?
 
-This is optional but highly recommended. You'll include one interesting insight from your project as part of the README. This insight is most effective when you include a visual. Keep in mind that this visual must be included as an image file (e.g., JPG, PNG, etc.). You can export plots created with `{ggplot2}` by using the function `ggsave`.
+Using R, multiple graphs and tables will be used to reveal which patterns most streongly correspond with league success.
+
 
 ## Repo Structure
 
