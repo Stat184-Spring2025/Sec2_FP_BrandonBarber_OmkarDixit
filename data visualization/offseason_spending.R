@@ -10,7 +10,7 @@ library(stringr)
 library(ggplot2)
 library(scales)
 
-##STANDIGNS TABLES
+##STANDINGS TABLES
 
 #2021-2022 standings
 
@@ -19,6 +19,8 @@ url1 <- "https://www.espn.com/soccer/standings/_/league/ESP.1/season/2021"
 standings_2022 <- read_html(url1) %>%
   html_table() %>%
   as.data.frame()
+
+#standard club names for the 2022 season
 
 la_liga_2022 <- c("Real Madrid CF", "FC Barcelona", "Atlético de Madrid", "Sevilla FC",
                   "Real Betis Balompié", "Real Sociedad", "Villarreal CF", "Athletic Club de Bilbao",
@@ -90,7 +92,7 @@ variables <- unique(names(liga1_expenditures))
 liga1_expenditures <- liga1_expenditures[-c(1,2,9)]
 names(liga1_expenditures) <- variables[-1]
 
-
+#select club and offseason expenditures
 liga1_expenditures <- 
   liga1_expenditures %>%
   dplyr::select(1,2)
@@ -193,7 +195,6 @@ ggplot()+
        x = "Offseason Spending (Millions of Euros)",
        y = "Rank") +
   
-  scale_y_reverse(breaks = 1:20, minor_breaks= NULL)+
+  scale_y_reverse(breaks = 1:20, minor_breaks= NULL)+  #make rank top to bottom
   
   theme_minimal()
-  
