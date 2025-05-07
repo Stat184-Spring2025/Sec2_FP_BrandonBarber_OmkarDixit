@@ -1,3 +1,4 @@
+
 library(dplyr)
 library(tidyr)
 library(readr)
@@ -10,14 +11,17 @@ library(scales)
 #Load Data
 player_value_raw <- read_csv("players_fifa23.csv")
 
-#Filter for LaLiga PLayers
+#La Liga teams list to filter for La Liga players
 la_liga<- c(
   "FC Barcelona", "Real Madrid CF", "Atlético de Madrid", "Real Sociedad",
   "Villarreal CF", "Real Betis Balompié", "CA Osasuna", "Athletic Club de Bilbao",
   "RCD Mallorca", "Girona FC", "Rayo Vallecano", "Sevilla FC", "RC Celta de Vigo",
-  "Cádiz CF", "Getafe CF", "Valencia CF", "Unión Deportiva Almería", "Real Valladolid CF",
-  "RCD Espanyol de Barcelona", "Elche CF"
+  "Cádiz CF", "Getafe CF", "Valencia CF", "Unión Deportiva Almería", "Real Valladolid CF", "RCD Espanyol de Barcelona", "Elche CF"
 )
+
+#Filter for La Liga players
+#Group by club
+#Sum total player value
 
 player_value <-
   player_value_raw %>%
@@ -29,11 +33,13 @@ player_value <-
   group_by(Club) %>%
   summarize(`Total Player Value (millions)` = sum(ValueEUR, na.rm = TRUE))%>%
   
-  #Show number in millions for clarity
+  #Show number in number of millions for clarity
   dplyr::mutate(`Total Player Value (millions)` = 
                   round(`Total Player Value (millions)`/ 1000000, 1))
 
-##Standings Data
+## Standings Data
+
+#import data
 url <- "https://www.espn.com/soccer/standings/_/league/ESP.1/season/2022"
 standings_2023 <- read_html(url) %>%
   html_table() %>%
@@ -63,6 +69,7 @@ url2 <- "https://www.transfermarkt.com/laliga/marktwerteverein/wettbewerb/ES1/pl
 page <- read_html(url2) %>%
   html_table() 
 
+#Isolate clubs and values for top division
 club_value_l1 <- 
   #select market value table with columns for club and their value
   page[[2]][-1, c(3,5)] %>%
@@ -72,11 +79,12 @@ club_value_l1 <-
 
   dplyr::rename(`Club Value (millions)` = League)
 
-#data for bottom division
+# load data for second division
 url3 <- "https://www.transfermarkt.com/laliga2/marktwerteverein/wettbewerb/ES2/plus/?stichtag=2023-07-15"
 page <- read_html(url3) %>%
   html_table() 
 
+#Isolate clubs and value from second division
 club_value_l2 <- 
   #select market value table with columns for club and their value
   page[[2]][-1, c(3,5)] %>%
@@ -106,7 +114,7 @@ for (term in prefix){
   club_values_names <- str_replace_all(club_values_names, term, "")
 }
 
-#replace dataset club names with univiersal names
+#replace dataset club names with univiersal cclub names
 standings_2023 <- 
   standings_2023 %>%
   dplyr::mutate(Club = standings_names)
@@ -120,7 +128,7 @@ club_values <-
   dplyr::mutate(Club = club_values_names)
 
 
-#join tables
+#join tables standings, club value, palyer value
 
 value_insight <-
   standings_2023 %>%
@@ -133,14 +141,15 @@ value_insight <-
 
 ggplot(value_insight, aes(y= Rank,
                           x = `Total Player Value (millions)`,
-                          size = `Club Value (millions)`)) + 
+                          size = `Club Value (millions)`)) +  #different club value
+                                                              #has different size
   geom_point() +
   
   labs(title = "La Liga 22-23: Total Player Values vs Standings") +
   
   scale_x_continuous(n.breaks = 5)+
   
-  scale_y_reverse(n.breaks = 20, minor_breaks = NULL)+
+  scale_y_reverse(n.breaks = 20, minor_breaks = NULL)+  #make rank be top to bottom
   
   
   theme_minimal()
