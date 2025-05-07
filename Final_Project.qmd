@@ -1,0 +1,752 @@
+---
+title: "Final Project"
+author: "Brandon Barber, Omkar Dixit"
+format: pdf
+editor: visual
+execute: 
+  warning: false
+  message: false
+  echo: false
+---
+
+*Explain La Liga and Focus of Project*
+*data provenance*
+
+### League Standings {.appendix}
+
+```{r}
+#| label: standings-22/23
+
+library(knitr)
+library(kableExtra)
+library(readr)
+library(rvest)
+
+url <- "https://www.espn.com/soccer/standings/_/league/ESP.1/season/2022"
+standings_2023 <- read_html(url) %>%
+  html_table() %>%
+  as.data.frame()
+
+la_liga_2023<- c(
+  "FC Barcelona", "Real Madrid CF", "Atlético de Madrid", "Real Sociedad",
+  "Villarreal CF", "Real Betis Balompié", "CA Osasuna", "Athletic Club de Bilbao",
+  "RCD Mallorca", "Girona FC", "Rayo Vallecano", "Sevilla FC", "RC Celta de Vigo",
+  "Cádiz CF", "Getafe CF", "Valencia CF", "Unión Deportiva Almería", "Real Valladolid CF",
+  "RCD Espanyol de Barcelona", "Elche CF"
+)
+
+standings_2023 <-
+  standings_2023 %>%
+  
+  rename(Club = 1) %>%
+  
+  #add universal club names from datasets
+  mutate(Club = la_liga_2023)%>%
+  
+  #add season end rank
+  mutate(Rank = seq(1, nrow(standings_2023)))
+
+standings_2023 <-
+  standings_2023[c(10,1,2,3,4,5,6,7,8,9)]
+
+kable(standings_2023, caption = "Final LaLiga Standings for 2022-23") %>%
+  kable_styling() %>%
+  footnote(general =
+             c("GP - Matches Played",
+               "W - Wins",
+               "D - Draws",
+               "L - Losses",
+               "F - Goals For",
+               "A - Goals Against",
+               "GD - Goal Differential",
+               "P - Points"),
+           general_title = "Legend:")
+
+
+```
+
+
+
+### Economic Value vs On Field Success in La Liga {.appendix}
+*talk about money and its importance*
+```{r}
+#| label: team-player-value
+#| fig-cap: "Each La Liga club's combined player market value taken from the FIFA dataset plotted against their 2022/23 final rank. Glyph size indicates overall club value."
+#| fig-align: 'center'
+#| fig-cap-location: top
+
+
+library(dplyr)
+library(tidyr)
+library(readr)
+library(rvest)
+library(ggplot2)
+library(scales)
+
+##Player value
+
+#Load Data
+player_value_raw <- read_csv("players_fifa23.csv")
+
+#Filter for LaLiga PLayers
+la_liga<- c(
+  "FC Barcelona", "Real Madrid CF", "Atlético de Madrid", "Real Sociedad",
+  "Villarreal CF", "Real Betis Balompié", "CA Osasuna", "Athletic Club de Bilbao",
+  "RCD Mallorca", "Girona FC", "Rayo Vallecano", "Sevilla FC", "RC Celta de Vigo",
+  "Cádiz CF", "Getafe CF", "Valencia CF", "Unión Deportiva Almería", "Real Valladolid CF",
+  "RCD Espanyol de Barcelona", "Elche CF"
+)
+
+player_value <-
+  player_value_raw %>%
+  
+  #select relevant columns
+  dplyr::filter(Club %in% la_liga) %>%
+  dplyr::select(Club, ValueEUR) %>%
+  
+  group_by(Club) %>%
+  summarize(`Total Player Value (millions)` = sum(ValueEUR, na.rm = TRUE))%>%
+  
+  #Show number in millions for clarity
+  dplyr::mutate(`Total Player Value (millions)` = 
+                  round(`Total Player Value (millions)`/ 1000000, 1))
+
+##Standings Data
+url <- "https://www.espn.com/soccer/standings/_/league/ESP.1/season/2022"
+standings_2023 <- read_html(url) %>%
+  html_table() %>%
+  as.data.frame()
+
+
+#isolate each team's final position in the league
+standings_2023 <-
+  standings_2023 %>%
+  dplyr::select(1) %>%
+  rename(Club = 1) %>%
+  
+  mutate(Club = la_liga)%>%
+  
+  mutate(Rank = seq(1, nrow(standings_2023)))
+
+## Club value data
+
+#LaLiga has promotion and relegation and this
+#contains the 3 teams that were promoted at the end of the year in the top division dataset
+#and the 3 teams that were demoted in the second division dataset
+#we have to join the top division table with the second division to get all the teams
+#that played in the 2022-2023 season
+
+#load data for top division
+url2 <- "https://www.transfermarkt.com/laliga/marktwerteverein/wettbewerb/ES1/plus/?stichtag=2023-06-15"
+page <- read_html(url2) %>%
+  html_table() 
+
+club_value_l1 <- 
+  #select market value table with columns for club and their value
+  page[[2]][-1, c(3,5)] %>%
+  
+  #parse number
+  dplyr::mutate(across(2, parse_number)) %>%
+
+  dplyr::rename(`Club Value (millions)` = League)
+
+#data for bottom division
+url3 <- "https://www.transfermarkt.com/laliga2/marktwerteverein/wettbewerb/ES2/plus/?stichtag=2023-07-15"
+page <- read_html(url3) %>%
+  html_table() 
+
+club_value_l2 <- 
+  #select market value table with columns for club and their value
+  page[[2]][-1, c(3,5)] %>%
+  
+  #parse number
+  dplyr::mutate(across(2, parse_number)) %>%
+  
+  dplyr::rename(`Club Value (millions)` = League)
+
+#combine tables to join with standings
+club_values <- 
+  bind_rows(club_value_l1, club_value_l2)
+
+
+#Clean data so all team names are equal for joining
+
+standings_names <- standings_2023[[1]]
+player_val_names <- player_value[[1]]
+club_values_names <- club_values[[1]]
+
+#remove all prefixes and other strings that are unique to each dataset
+prefix <- c("Unión Deportiva", "FC", "CF", "RCD", "RC", "de", "Club", "CA", " ", "UD", "CD", "SD")
+
+for (term in prefix){
+  standings_names <- str_replace_all(standings_names, term, "")
+  player_val_names <- str_replace_all(player_val_names, term, "")
+  club_values_names <- str_replace_all(club_values_names, term, "")
+}
+
+#replace dataset club names with univiersal names
+standings_2023 <- 
+  standings_2023 %>%
+  dplyr::mutate(Club = standings_names)
+
+player_value <-
+  player_value %>%
+  dplyr::mutate(Club = player_val_names)
+
+club_values <-
+  club_values %>%
+  dplyr::mutate(Club = club_values_names)
+
+
+#join tables
+
+value_insight <-
+  standings_2023 %>%
+  left_join(club_values, by = "Club") %>%
+  left_join(player_value, by = "Club" ) %>%
+  
+  dplyr::mutate(Club = la_liga)
+
+##Plot
+
+ggplot(value_insight, aes(y= Rank,
+                          x = `Total Player Value (millions)`,
+                          size = `Club Value (millions)`)) + 
+  geom_point() +
+  
+  labs(title = "La Liga 22-23: Total Player Values vs Standings") +
+  
+  scale_x_continuous(n.breaks = 5)+
+  
+  scale_y_reverse(n.breaks = 20, minor_breaks = NULL)+
+  
+  
+  theme_minimal()
+```
+*analysis on previous graph*
+
+### Impact of the Offseason {.appendix}
+*precursor to section - whats better buying players or developing*
+
+```{r}
+#| label: offseason-purchases
+#| fig-cap: "Offseason player spending plotted against league rank at the end of the 2022/23 La Liga season. Each point represents a club, with arrows indicating changes in rank from the 2021/22 season. Green arrows indicate improvement, red indicate decline, black points indicate no change, and arrow length indicates the magnitude of change."
+#| fig.align: 'center'
+
+### OFF SEASON SPENDING 
+
+library(readr)
+library(rvest)
+
+library(dplyr)
+library(tidyr)
+library(stringr)
+
+library(ggplot2)
+library(scales)
+
+##STANDIGNS TABLES
+
+#2021-2022 standings
+
+#load data
+url1 <- "https://www.espn.com/soccer/standings/_/league/ESP.1/season/2021"
+standings_2022 <- read_html(url1) %>%
+  html_table() %>%
+  as.data.frame()
+
+la_liga_2022 <- c("Real Madrid CF", "FC Barcelona", "Atlético de Madrid", "Sevilla FC",
+                  "Real Betis Balompié", "Real Sociedad", "Villarreal CF", "Athletic Club de Bilbao",
+                  "Valencia CF", "CA Osasuna", "RC Celta de Vigo", "Rayo Vallecano",
+                  "Elche CF", "RCD Espanyol de Barcelona", "Getafe CF", "RCD Mallorca",
+                  "Cádiz CF", "Granada CF", "Levante UD", "Deportivo Alavés"
+                  )
+
+standings_2022 <-
+  standings_2022 %>%
+  dplyr::select(1) %>%
+  rename(Club = 1) %>%
+  
+  #add universal club names from datasets
+  mutate(Club = la_liga_2022) %>%
+  
+  #add season ending rank
+  mutate(`Rank 2022` = seq(1, nrow(standings_2022)))
+
+#2022-2023 standings
+
+#load data
+url2 <- "https://www.espn.com/soccer/standings/_/league/ESP.1/season/2022"
+standings_2023 <- read_html(url2) %>%
+  html_table() %>%
+  as.data.frame()
+
+la_liga_2023 <- c(
+  "FC Barcelona", "Real Madrid CF", "Atlético de Madrid", "Real Sociedad",
+  "Villarreal CF", "Real Betis Balompié", "CA Osasuna", "Athletic Club de Bilbao",
+  "RCD Mallorca", "Girona FC", "Rayo Vallecano", "Sevilla FC", "RC Celta de Vigo",
+  "Cádiz CF", "Getafe CF", "Valencia CF", "Unión Deportiva Almería", "Real Valladolid CF",
+  "RCD Espanyol de Barcelona", "Elche CF"
+)
+
+standings_2023 <-
+  standings_2023 %>%
+  dplyr::select(1) %>%
+  rename(Club = 1) %>%
+  
+  #add universal club names from datasets
+  mutate(Club = la_liga_2023) %>%
+  
+  #add season ending rank
+  mutate(`Rank 2023` = seq(1, nrow(standings_2023)))
+
+
+#Joint standings
+
+#due to promotion and relegation, the same teams are not in
+#the top division of Spanish soccer every year. We want to only see
+#the teams that were in LaLiga for both years
+
+joint_standings <- 
+  standings_2023 %>%
+  inner_join(standings_2022, by = "Club") 
+  
+
+##OFFSEASON SPENDING
+
+#import data
+url3 <- "https://www.transfermarkt.com/laliga/einnahmenausgaben/wettbewerb/ES1/ids/a/sa//saison_id/2021/saison_id_bis/2022/nat/0/pos//w_s//intern/0"
+page1 <- read_html(url3) %>%
+  html_table() 
+liga1_expenditures<- page1[[2]]
+
+#clean column names (n/a columns were included)
+variables <- unique(names(liga1_expenditures))
+liga1_expenditures <- liga1_expenditures[-c(1,2,9)]
+names(liga1_expenditures) <- variables[-1]
+
+
+liga1_expenditures <- 
+  liga1_expenditures %>%
+  dplyr::select(1,2)
+
+
+## Expenditures Comparison
+
+#Clean data so expenditures club names are the same as standings
+
+standings_names <- joint_standings[[1]]
+expenditures_names <- liga1_expenditures[[1]]
+final_names <- joint_standings[[1]]  #copy of our output club names
+
+#remove all prefixes and other strings that are unique to each dataset
+prefix <- c("FC", "CF", "RCD", "RC", "de", "Club", "CA", " ", "LA")
+
+for (term in prefix){
+  standings_names <- str_replace_all(standings_names, term, "")
+  expenditures_names <- str_replace_all(expenditures_names, term, "")
+}
+
+#replace dataset club names with univiersal names
+joint_standings <- 
+  joint_standings %>%
+  dplyr::mutate(Club = standings_names)
+
+liga1_expenditures <-
+  liga1_expenditures %>%
+  dplyr::mutate(Club = expenditures_names)
+
+#join standings with expenditures, parsing for numbers
+expenditure_rank <-
+  joint_standings %>%
+  left_join(liga1_expenditures, by = 'Club') %>%
+  dplyr::mutate(Club = final_names) %>%
+  
+  dplyr::mutate(Expenditure = str_replace_all(Expenditure, '-', '0')) %>%
+  rename(`Expenditure (millions)` = Expenditure) %>%
+  dplyr::mutate(across(`Expenditure (millions)`, parse_number))
+  
+#split table into teams that stayed the same vs changed
+#teams that stayed the same will use a point and not an arrow
+
+rank_up <-
+  expenditure_rank %>%
+  dplyr::filter(`Rank 2023` < `Rank 2022`)
+
+rank_down <-
+  expenditure_rank %>%
+  dplyr::filter(`Rank 2023` > `Rank 2022`)
+
+rank_same <-
+  expenditure_rank %>%
+  dplyr::filter(`Rank 2022` == `Rank 2023`)
+
+
+#Plot
+ggplot()+
+  
+  geom_segment(data = rank_up, aes(
+    x = `Expenditure (millions)`,
+    xend = `Expenditure (millions)`,
+    y = `Rank 2022`,
+    yend = `Rank 2023`),
+    
+    arrow = arrow(length = unit(0.17, "cm")),
+    color = "forestgreen"
+  ) +
+  
+  geom_point(data = rank_up, aes(
+    x = `Expenditure (millions)`,
+    y = `Rank 2022`),
+    color = "forestgreen",
+    size = 0.8
+  ) +
+  
+  geom_segment(data = rank_down, aes(
+    x = `Expenditure (millions)`,
+    xend = `Expenditure (millions)`,
+    y = `Rank 2022`,
+    yend = `Rank 2023`),
+    
+    arrow = arrow(length = unit(0.17, "cm")),
+    color = "red"
+  ) +
+  
+  
+  geom_point(data = rank_down, aes(
+    x = `Expenditure (millions)`,
+    y = `Rank 2022`),
+    color = "red",
+    size = 0.8
+  ) +
+  
+  geom_point(data = rank_same, aes(
+    x = `Expenditure (millions)`,
+    y = `Rank 2023`)) +
+  
+  labs(title = "Impact of Offseason Spending on Performance",
+       x = "Offseason Spending (Millions of Euros)",
+       y = "Rank") +
+  
+  scale_y_reverse(breaks = 1:20, minor_breaks= NULL)+
+  
+  theme_minimal()
+```
+*analysis on offseason spending*
+```{r}
+#| label: academy-promotion
+#| fig-cap: "Number of academy players promoted to the first team throught for each club the 2022/23 La Liga season plotted against end of season rank. Each point represents a club, with arrows indicating changes in rank from the 2021/22 season. Green arrows indicate improvement, red indicate decline, black points indicate no change, and arrow length indicates the magnitude of change."
+#| fig.align: 'center'
+
+###ACADEMIES
+library(readr)
+library(rvest)
+
+library(dplyr)
+library(tidyr)
+library(stringr)
+
+library(ggplot2)
+library(scales)
+
+##STANDIGNS TABLES
+
+#2021-2022 standings
+
+#load data
+url1 <- "https://www.espn.com/soccer/standings/_/league/ESP.1/season/2021"
+standings_2022 <- read_html(url1) %>%
+  html_table() %>%
+  as.data.frame()
+
+la_liga_2022 <- c("Real Madrid CF", "FC Barcelona", "Atlético de Madrid", "Sevilla FC",
+                  "Real Betis Balompié", "Real Sociedad", "Villarreal CF", "Athletic Club de Bilbao",
+                  "Valencia CF", "CA Osasuna", "RC Celta de Vigo", "Rayo Vallecano",
+                  "Elche CF", "RCD Espanyol de Barcelona", "Getafe CF", "RCD Mallorca",
+                  "Cádiz CF", "Granada CF", "Levante UD", "Deportivo Alavés"
+)
+
+standings_2022 <-
+  standings_2022 %>%
+  dplyr::select(1) %>%
+  rename(Club = 1) %>%
+  
+  #add universal club names from datasets
+  mutate(Club = la_liga_2022) %>%
+  
+  #add season ending rank
+  mutate(`Rank 2022` = seq(1, nrow(standings_2022)))
+
+#2022-2023 standings
+
+#load data
+url2 <- "https://www.espn.com/soccer/standings/_/league/ESP.1/season/2022"
+standings_2023 <- read_html(url2) %>%
+  html_table() %>%
+  as.data.frame()
+
+la_liga_2023 <- c(
+  "FC Barcelona", "Real Madrid CF", "Atlético de Madrid", "Real Sociedad",
+  "Villarreal CF", "Real Betis Balompié", "CA Osasuna", "Athletic Club de Bilbao",
+  "RCD Mallorca", "Girona FC", "Rayo Vallecano", "Sevilla FC", "RC Celta de Vigo",
+  "Cádiz CF", "Getafe CF", "Valencia CF", "Unión Deportiva Almería", "Real Valladolid CF",
+  "RCD Espanyol de Barcelona", "Elche CF"
+)
+
+standings_2023 <-
+  standings_2023 %>%
+  dplyr::select(1) %>%
+  rename(Club = 1) %>%
+  
+  #add universal club names from datasets
+  mutate(Club = la_liga_2023) %>%
+  
+  #add season ending rank
+  mutate(`Rank 2023` = seq(1, nrow(standings_2023)))
+
+
+#Joint standings
+
+#due to promotion and relegation, the same teams are not in
+#the top division of Spanish soccer every year. We want to only see
+#the teams that were in LaLiga for both years
+
+joint_standings <- 
+  standings_2023 %>%
+  inner_join(standings_2022, by = "Club") 
+
+
+##Academy Transfer Data
+
+#load data
+academy_callups_raw <- read_csv("La_Liga_Academy_Promotion_2022_23.csv")
+
+academy_callups <-
+  academy_callups_raw %>%
+  group_by(Club) %>%
+  summarise(Count = n())
+
+#Clean data so expenditures club names are the same as standings
+
+standings_names <- joint_standings[[1]]
+callups_names <- academy_callups[[1]]
+final_names <- joint_standings[[1]]  #copy of our output club names
+
+#remove all prefixes and other strings that are unique to each dataset
+prefix <- c("FC", "CF", "RCD", "RC", "de", "Club", "CA", " ", "LA")
+
+for (term in prefix){
+  standings_names <- str_replace_all(standings_names, term, "")
+  callups_names <- str_replace_all(callups_names, term, "")
+}
+
+#replace dataset club names with univiersal names
+joint_standings <- 
+  joint_standings %>%
+  dplyr::mutate(Club = standings_names)
+
+academy_callups <-
+  academy_callups %>%
+  dplyr::mutate(Club = callups_names)
+
+#join standings with number of callups
+callups_rank <-
+  joint_standings %>%
+  left_join(academy_callups, by = 'Club') %>%
+  dplyr::mutate(Club = final_names)
+
+#split table into teams that stayed the same vs changed
+#teams that stayed the same will use a point and not an arrow
+
+rank_up <-
+  callups_rank %>%
+  dplyr::filter(`Rank 2023` < `Rank 2022`)
+
+rank_down <-
+  callups_rank %>%
+  dplyr::filter(`Rank 2023` > `Rank 2022`)
+
+rank_same <-
+  callups_rank %>%
+  dplyr::filter(`Rank 2022` == `Rank 2023`)
+
+
+#Plot
+ggplot()+
+  
+  geom_segment(data = rank_up, aes(
+    x = Count,
+    xend = Count + 0.25, #add angle to distinguish between teams with the same number
+    y = `Rank 2022`,
+    yend = `Rank 2023`),
+    
+    arrow = arrow(length = unit(0.25, "cm")),
+    color = "forestgreen"
+  ) +
+  
+  geom_point(data = rank_up, aes(
+    x = Count,
+    y = `Rank 2022`),
+    color = "forestgreen",
+    size = 0.95
+  ) +
+  
+  geom_segment(data = rank_down, aes(
+    x = Count,
+    xend = Count - 0.25, #add angle to distinguish between teams with the same number
+    y = `Rank 2022`,
+    yend = `Rank 2023`),
+    
+    arrow = arrow(length = unit(0.25, "cm")),
+    color = "red"
+  ) +
+  
+  
+  geom_point(data = rank_down, aes(
+    x = Count,
+    y = `Rank 2022`),
+    color = "red",
+    size = 0.95
+  ) +
+  
+  geom_point(data = rank_same, aes(
+    x = Count,
+    y = `Rank 2023`)) +
+  
+  labs(title = "Impact of Academy Promotions on Performance",
+       x = "Number of Academy Signings",
+       y = "Rank") +
+  
+  scale_y_reverse(breaks = 1:20, minor_breaks= NULL)+
+  
+  scale_x_continuous(n.breaks = 10) +
+  
+  theme_minimal()
+```
+*analysis on academy*
+
+### Does FIFA Rating Help Predict Success?
+*fifa explanation*
+```{r}
+#| label: fifa-ratings
+#| fig-cap: "Average FIFA 23 player rating for each La Liga club, based on mean overall ratings of all rostered players. Clubs are ordered by their final rank in the 2022/23 season, with the top representing the highest ranked team and the bottom the lowest."
+#| fig.align: 'center'
+#| fig-height: 4.75
+
+##FIFA OVERALL VISUALIZATION
+
+library(dplyr)
+library(tidyr)
+library(readr)
+library(rvest)
+
+##Team Overall
+
+#Load Data
+fifa_rating <- read_csv("players_fifa23.csv")
+
+#Filter for LaLiga PLayers
+la_liga<- c(
+  "FC Barcelona", "Real Madrid CF", "Atlético de Madrid", "Real Sociedad",
+  "Villarreal CF", "Real Betis Balompié", "CA Osasuna", "Athletic Club de Bilbao",
+  "RCD Mallorca", "Girona FC", "Rayo Vallecano", "Sevilla FC", "RC Celta de Vigo",
+  "Cádiz CF", "Getafe CF", "Valencia CF", "Unión Deportiva Almería", "Real Valladolid CF",
+  "RCD Espanyol de Barcelona", "Elche CF"
+)
+
+fifa_rating <-
+  fifa_rating %>%
+  dplyr::filter(Club %in% la_liga)%>%  
+  dplyr::filter(!is.na(Overall))
+  
+#Calculate average player rating per club
+club_avg_rating <- 
+  fifa_rating %>%
+  group_by(Club) %>%
+  summarize(Average_Overall = round(mean(Overall, na.rm = TRUE), 2)) %>%
+  arrange(desc(Average_Overall))
+
+
+#2022-2023 standings
+
+#load data
+url <- "https://www.espn.com/soccer/standings/_/league/ESP.1/season/2022"
+standings_2023 <- read_html(url) %>%
+  html_table() %>%
+  as.data.frame()
+
+
+standings_2023 <-
+  standings_2023 %>%
+  dplyr::select(1) %>%
+  rename(Club = 1) %>%
+  
+  #add universal club names from datasets
+  mutate(Club = la_liga) %>%
+  
+  #add season ending rank
+  mutate(`Rank 2023` = seq(1, nrow(standings_2023)))
+
+## Join overall with standings
+
+rating_standings <-
+  standings_2023 %>%
+  left_join(club_avg_rating, by = "Club")
+
+#Plot bar chart
+
+ggplot(rating_standings, aes(x = Average_Overall, y = reorder(Club, -`Rank 2023`))) +
+  
+  geom_point(size = 4, color = "steelblue") +
+  
+  xlim(70,80)+
+  
+  labs(title = "Average Player FIFA Rating in La Liga 2022/23", x = "Average Overall", y = "Club") +
+  
+  geom_text(aes(label = Average_Overall), hjust = -0.4, size = 3) +
+  
+  theme_minimal()
+
+
+```
+
+*other ending stuff (FAIR and CARE)*
+
+*resources*
+
+## Code Appendix {.appendix}
+
+### League Standings
+```{r}
+#| ref.label: standings-22/23
+#| echo: true
+#| eval: false
+```
+
+### Club and Player Value
+```{r}
+#| ref.label: team-player-value
+#| echo: true
+#| eval: false
+```
+
+### Offseason Spending
+```{r}
+#| ref.label: offseason-purchases
+#| echo: true
+#| eval: false
+```
+
+### Offseason Academy Promotion
+```{r}
+#| ref.label: academy-promotion
+#| echo: true
+#| eval: false
+```
+
+### Fifa Rating
+```{r}
+#| ref.label: fifa-ratings
+#| echo: true
+#| eval: false
+```
