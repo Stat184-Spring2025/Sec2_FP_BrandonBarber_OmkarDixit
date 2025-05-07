@@ -8,31 +8,59 @@ execute:
   message: false
   echo: false
 ---
+# Intoduction
+Soccer is one of the most popular sports in the world, being played in almost every country. Of the top leagues in the world, the Spanish *La Liga* is among the most elite. This report aims to discover which factors have the most effect on a clubs success in the top league.\
 
-*Explain La Liga and Focus of Project*
-*data provenance*
+Our analysis focuses on the players that make up each club and is based on these
+questions:\
 
-### League Standings {.appendix}
+1. Do clubs see more success from purchasing players in the offseason or
+fostering talent from their youth acaedmies?\
+
+2. Do a team's player stastics in the FIFA 23 videogame have a relationship with how 
+the team performs in the season?\
+
+
+# Data Provenance
+
+### 1. Transfer and Academy Data\
+  **Source:** Transfermarkt - portal for data on soccer transfers, market values, and statistics\
+  **Use:** Collect data on offseason spending, club value, and academy trasnfers for the
+  2022/23 season
+  
+### 2. Fifa Statistics\
+  **Source:** Kaggle - dataset for all players in FIFA 23 \
+  **Use:** Gather data on the overalls for each player in La Liga
+  
+### 3. La Liga Standings\
+  **Source:** ESPN - sports media company
+  **Use:** Gather data on the La Liga standings for the 2021/22 and 2022/23 seasons
+  
+  
+
+# League Standings {.appendix}
 
 ```{r}
 #| label: standings-22/23
+#Tidyverse Style Guide
 
 library(knitr)
 library(kableExtra)
 library(readr)
 library(rvest)
 
+#import data
 url <- "https://www.espn.com/soccer/standings/_/league/ESP.1/season/2022"
 standings_2023 <- read_html(url) %>%
   html_table() %>%
   as.data.frame()
 
+# La Liga team names used to standardize across datasets
 la_liga_2023<- c(
   "FC Barcelona", "Real Madrid CF", "Atlético de Madrid", "Real Sociedad",
   "Villarreal CF", "Real Betis Balompié", "CA Osasuna", "Athletic Club de Bilbao",
   "RCD Mallorca", "Girona FC", "Rayo Vallecano", "Sevilla FC", "RC Celta de Vigo",
-  "Cádiz CF", "Getafe CF", "Valencia CF", "Unión Deportiva Almería", "Real Valladolid CF",
-  "RCD Espanyol de Barcelona", "Elche CF"
+  "Cádiz CF", "Getafe CF", "Valencia CF", "Unión Deportiva Almería", "Real Valladolid CF", "RCD Espanyol de Barcelona", "Elche CF"
 )
 
 standings_2023 <-
@@ -47,10 +75,10 @@ standings_2023 <-
   mutate(Rank = seq(1, nrow(standings_2023)))
 
 standings_2023 <-
-  standings_2023[c(10,1,2,3,4,5,6,7,8,9)]
+  standings_2023[c(10, 1, 2, 3, 4, 5, 6, 7, 8, 9)]
 
 kable(standings_2023, caption = "Final LaLiga Standings for 2022-23") %>%
-  kable_styling() %>%
+  kable_styling(font_size = 8) %>%
   footnote(general =
              c("GP - Matches Played",
                "W - Wins",
@@ -67,8 +95,8 @@ kable(standings_2023, caption = "Final LaLiga Standings for 2022-23") %>%
 
 
 
-### Economic Value vs On Field Success in La Liga {.appendix}
-*talk about money and its importance*
+# Economic Value vs On Field Success in La Liga {.appendix}
+
 ```{r}
 #| label: team-player-value
 #| fig-cap: "Each La Liga club's combined player market value taken from the FIFA dataset plotted against their 2022/23 final rank. Glyph size indicates overall club value."
@@ -88,14 +116,17 @@ library(scales)
 #Load Data
 player_value_raw <- read_csv("players_fifa23.csv")
 
-#Filter for LaLiga PLayers
+#La Liga teams list to filter for La Liga players
 la_liga<- c(
   "FC Barcelona", "Real Madrid CF", "Atlético de Madrid", "Real Sociedad",
   "Villarreal CF", "Real Betis Balompié", "CA Osasuna", "Athletic Club de Bilbao",
   "RCD Mallorca", "Girona FC", "Rayo Vallecano", "Sevilla FC", "RC Celta de Vigo",
-  "Cádiz CF", "Getafe CF", "Valencia CF", "Unión Deportiva Almería", "Real Valladolid CF",
-  "RCD Espanyol de Barcelona", "Elche CF"
+  "Cádiz CF", "Getafe CF", "Valencia CF", "Unión Deportiva Almería", "Real Valladolid CF", "RCD Espanyol de Barcelona", "Elche CF"
 )
+
+#Filter for La Liga players
+#Group by club
+#Sum total player value
 
 player_value <-
   player_value_raw %>%
@@ -107,11 +138,13 @@ player_value <-
   group_by(Club) %>%
   summarize(`Total Player Value (millions)` = sum(ValueEUR, na.rm = TRUE))%>%
   
-  #Show number in millions for clarity
+  #Show number in number of millions for clarity
   dplyr::mutate(`Total Player Value (millions)` = 
                   round(`Total Player Value (millions)`/ 1000000, 1))
 
-##Standings Data
+## Standings Data
+
+#import data
 url <- "https://www.espn.com/soccer/standings/_/league/ESP.1/season/2022"
 standings_2023 <- read_html(url) %>%
   html_table() %>%
@@ -141,6 +174,7 @@ url2 <- "https://www.transfermarkt.com/laliga/marktwerteverein/wettbewerb/ES1/pl
 page <- read_html(url2) %>%
   html_table() 
 
+#Isolate clubs and values for top division
 club_value_l1 <- 
   #select market value table with columns for club and their value
   page[[2]][-1, c(3,5)] %>%
@@ -150,11 +184,12 @@ club_value_l1 <-
 
   dplyr::rename(`Club Value (millions)` = League)
 
-#data for bottom division
+# load data for second division
 url3 <- "https://www.transfermarkt.com/laliga2/marktwerteverein/wettbewerb/ES2/plus/?stichtag=2023-07-15"
 page <- read_html(url3) %>%
   html_table() 
 
+#Isolate clubs and value from second division
 club_value_l2 <- 
   #select market value table with columns for club and their value
   page[[2]][-1, c(3,5)] %>%
@@ -184,7 +219,7 @@ for (term in prefix){
   club_values_names <- str_replace_all(club_values_names, term, "")
 }
 
-#replace dataset club names with univiersal names
+#replace dataset club names with univiersal cclub names
 standings_2023 <- 
   standings_2023 %>%
   dplyr::mutate(Club = standings_names)
@@ -198,7 +233,7 @@ club_values <-
   dplyr::mutate(Club = club_values_names)
 
 
-#join tables
+#join tables standings, club value, palyer value
 
 value_insight <-
   standings_2023 %>%
@@ -211,22 +246,27 @@ value_insight <-
 
 ggplot(value_insight, aes(y= Rank,
                           x = `Total Player Value (millions)`,
-                          size = `Club Value (millions)`)) + 
+                          size = `Club Value (millions)`)) +  #different club value
+                                                              #has different size
   geom_point() +
   
   labs(title = "La Liga 22-23: Total Player Values vs Standings") +
   
   scale_x_continuous(n.breaks = 5)+
   
-  scale_y_reverse(n.breaks = 20, minor_breaks = NULL)+
+  scale_y_reverse(n.breaks = 20, minor_breaks = NULL)+  #make rank be top to bottom
   
   
   theme_minimal()
 ```
-*analysis on previous graph*
+The graph shows a relationship between higher total player value and better league performance. The two clubs ranked highest in the league are seen in the top right corner with large glyphs, possibly indicating that more spending is indictaive of better performance. 
 
-### Impact of the Offseason {.appendix}
-*precursor to section - whats better buying players or developing*
+On the other hand, outside of the top left and bottom right corners, club value seems to show no relationship with rank, especially in the teams ranked in the bottom half of the league. Club value is calculated from a club's annual revenue and infrastructure value. This graph suggests that the players have much more of an impact on team performance than the overall wealth of the club.
+
+Upon further analysis, the overall shape of the graph is shown to be downward sloping, and the relationship between player value and rank flattens out at around €350 million. This  suggests that spending is important for smaller clubs ranked lower in the league but becomes less important for the larger clubs towards the middle and top of the league. 
+
+# Impact of the Offseason {.appendix}
+Soccer clubs can acquire players by any one of three methods, a purchase of a player from another club also known as a trasnfer, a player being loaned from once club to another from a set amount of time, or training players from a young age to be eventually promoted to their first team. These plots will analyze the impact of purchasing players in the offseason on team performance versus promoting academy players.
 
 ```{r}
 #| label: offseason-purchases
@@ -245,7 +285,7 @@ library(stringr)
 library(ggplot2)
 library(scales)
 
-##STANDIGNS TABLES
+##STANDINGS TABLES
 
 #2021-2022 standings
 
@@ -254,6 +294,8 @@ url1 <- "https://www.espn.com/soccer/standings/_/league/ESP.1/season/2021"
 standings_2022 <- read_html(url1) %>%
   html_table() %>%
   as.data.frame()
+
+#standard club names for the 2022 season
 
 la_liga_2022 <- c("Real Madrid CF", "FC Barcelona", "Atlético de Madrid", "Sevilla FC",
                   "Real Betis Balompié", "Real Sociedad", "Villarreal CF", "Athletic Club de Bilbao",
@@ -325,7 +367,7 @@ variables <- unique(names(liga1_expenditures))
 liga1_expenditures <- liga1_expenditures[-c(1,2,9)]
 names(liga1_expenditures) <- variables[-1]
 
-
+#select club and offseason expenditures
 liga1_expenditures <- 
   liga1_expenditures %>%
   dplyr::select(1,2)
@@ -428,17 +470,17 @@ ggplot()+
        x = "Offseason Spending (Millions of Euros)",
        y = "Rank") +
   
-  scale_y_reverse(breaks = 1:20, minor_breaks= NULL)+
+  scale_y_reverse(breaks = 1:20, minor_breaks= NULL)+  #make rank top to bottom
   
   theme_minimal()
 ```
-*analysis on offseason spending*
+The results show a lack of causation between offseason spending and performance increase. Clubs spent a relatively small amount, 30-60 million, show both improvements and declines in performance. There are also a few clubs that spend over €100 million and saw no improvement.
+
 ```{r}
 #| label: academy-promotion
 #| fig-cap: "Number of academy players promoted to the first team throught for each club the 2022/23 La Liga season plotted against end of season rank. Each point represents a club, with arrows indicating changes in rank from the 2021/22 season. Green arrows indicate improvement, red indicate decline, black points indicate no change, and arrow length indicates the magnitude of change."
 #| fig.align: 'center'
 
-###ACADEMIES
 library(readr)
 library(rvest)
 
@@ -449,7 +491,7 @@ library(stringr)
 library(ggplot2)
 library(scales)
 
-##STANDIGNS TABLES
+##STANDINGS TABLES
 
 #2021-2022 standings
 
@@ -477,7 +519,7 @@ standings_2022 <-
   #add season ending rank
   mutate(`Rank 2022` = seq(1, nrow(standings_2022)))
 
-#2022-2023 standings
+##2022-2023 standings
 
 #load data
 url2 <- "https://www.espn.com/soccer/standings/_/league/ESP.1/season/2022"
@@ -505,7 +547,7 @@ standings_2023 <-
   mutate(`Rank 2023` = seq(1, nrow(standings_2023)))
 
 
-#Joint standings
+##Joint standings
 
 #due to promotion and relegation, the same teams are not in
 #the top division of Spanish soccer every year. We want to only see
@@ -521,6 +563,7 @@ joint_standings <-
 #load data
 academy_callups_raw <- read_csv("La_Liga_Academy_Promotion_2022_23.csv")
 
+#group by club and count how many players called up
 academy_callups <-
   academy_callups_raw %>%
   group_by(Club) %>%
@@ -623,15 +666,17 @@ ggplot()+
   
   theme_minimal()
 ```
-*analysis on academy*
+Unlike the graph on offseason spending , there is a slightly stronger trend of clubs with higher numbers of academy signings showing improvement in rank. This suggests that developing players with the sole purpose of beign on the first team may lead to more success than purchasing big name players used to playing in other systems. Although a few clubs with many academy promotions declined, the overall graph shows a benefit in academy signings.
 
-### Does FIFA Rating Help Predict Success?
-*fifa explanation*
+# Does FIFA Rating Help Predict Success?
+FIFA 23 is a soccer video game made by EA Sports that contains real world players, teams, and leagues. Each player is assigned an *overall* rating, which is a score from 1 to 99 based on their general skill level. The rating is based on individual attributes such as: shooting, speed, tackling, and strength. 
+
+The following plot aims to determine if the rankings of the players  in the video game, released before every season, can be used to predict a team's league performance.
 ```{r}
 #| label: fifa-ratings
 #| fig-cap: "Average FIFA 23 player rating for each La Liga club, based on mean overall ratings of all rostered players. Clubs are ordered by their final rank in the 2022/23 season, with the top representing the highest ranked team and the bottom the lowest."
 #| fig.align: 'center'
-#| fig-height: 4.75
+#| fig-height: 4.7
 
 ##FIFA OVERALL VISUALIZATION
 
@@ -667,7 +712,7 @@ club_avg_rating <-
   arrange(desc(Average_Overall))
 
 
-#2022-2023 standings
+##2022-2023 standings
 
 #load data
 url <- "https://www.espn.com/soccer/standings/_/league/ESP.1/season/2022"
@@ -701,7 +746,7 @@ ggplot(rating_standings, aes(x = Average_Overall, y = reorder(Club, -`Rank 2023`
   
   xlim(70,80)+
   
-  labs(title = "Average Player FIFA Rating in La Liga 2022/23", x = "Average Overall", y = "Club") +
+  labs(title = "Average Player FIFA Rating - La Liga 22/23", x = "Average Overall", y = "Club") +
   
   geom_text(aes(label = Average_Overall), hjust = -0.4, size = 3) +
   
@@ -709,12 +754,20 @@ ggplot(rating_standings, aes(x = Average_Overall, y = reorder(Club, -`Rank 2023`
 
 
 ```
+The graph exhibits a clear linear relationship between a club's average FIFA 23 player rating and its final league standing in the 2022/23 La Liga season. Clubs ranked higher in the league, such as Barcelona and Real Madrid, tend to have higher average player ratings. Conversely, teams with lower rank, such as Elche and Espanyolshow lower average ratings.
 
-*other ending stuff (FAIR and CARE)*
+This positive correlation suggests that FIFA 23 player ratings can reflect the quality of real teams, despite being part of a video game.
 
-*resources*
+#Conclusion
+This report examined key factors that can have influence on team success in La Liga, including total player market value, offseason transfer spending, academy player promotions, and FIFA 23 player ratings. The graphs showed a strong linear relationship between both total squad value and average player ratings with a team's final league ranking. Clubs like Barcelona and Real Madrid that ranked highest in both player value and average ratings, also finished at the top of the league. This suggests that roster quality is key in team success. This also showsthat FIFA’s video game ratings may reasonably reflect team strength.
 
-## Code Appendix {.appendix}
+On the other hand, offseason transfer spending alone did not have as strong a correlation with improved performance as academy spending. Some clubs spent large amounts and declined in rank, while others, with lesser investments, improved. In contrast, clubs that promoted more players from their academies showed a pattern of improvement, suggesting that internal development of players can be both cost effective, and can lead to future success. Overall, the visuals indicate that, while financial value and player quality are important to success in La Liga, strategies like youth promotion can provide a meaningful competitive edge.
+
+# FAIR Principles
+- **Findable**: Data is all accessible by either public url or csv file\
+- **Interoperable**: Data is stored as csv files or html tables
+
+# Code Appendix {.appendix}
 
 ### League Standings
 ```{r}
