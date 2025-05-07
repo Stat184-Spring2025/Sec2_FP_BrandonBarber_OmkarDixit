@@ -1,4 +1,4 @@
-###ACADEMIES
+
 library(readr)
 library(rvest)
 
@@ -9,7 +9,7 @@ library(stringr)
 library(ggplot2)
 library(scales)
 
-##STANDIGNS TABLES
+##STANDINGS TABLES
 
 #2021-2022 standings
 
@@ -37,7 +37,7 @@ standings_2022 <-
   #add season ending rank
   mutate(`Rank 2022` = seq(1, nrow(standings_2022)))
 
-#2022-2023 standings
+##2022-2023 standings
 
 #load data
 url2 <- "https://www.espn.com/soccer/standings/_/league/ESP.1/season/2022"
@@ -65,7 +65,7 @@ standings_2023 <-
   mutate(`Rank 2023` = seq(1, nrow(standings_2023)))
 
 
-#Joint standings
+##Joint standings
 
 #due to promotion and relegation, the same teams are not in
 #the top division of Spanish soccer every year. We want to only see
@@ -81,6 +81,7 @@ joint_standings <-
 #load data
 academy_callups_raw <- read_csv("La_Liga_Academy_Promotion_2022_23.csv")
 
+#group by club and count how many players called up
 academy_callups <-
   academy_callups_raw %>%
   group_by(Club) %>%
