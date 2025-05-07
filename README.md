@@ -1,4 +1,4 @@
-# Analysis of the Factors That Contribute to Succes in La Liga
+# Analysis of the Factors That Contribute to Success in La Liga
 
 This repo contains the data, and code for our report on Success in La Liga. Th report discusses which factors have a strong relationship with success in the league, comparing across years and factors. 
 ## Overview
@@ -35,8 +35,9 @@ Using R, multiple graphs and tables will be used to reveal which patterns most s
    - FIFA Data
 
 ## Data Sources and Acknowledgements
-
-Be sure to list where you got any data used within the project. Be sure to acknowledge any one whose work or elements you're drawing upon.
+- League standings data sourced from ESPN
+- FIFA data sourced from kaggle
+- Club value and transfer data sourced from Transfermarkt
 
 ## Authors
 
