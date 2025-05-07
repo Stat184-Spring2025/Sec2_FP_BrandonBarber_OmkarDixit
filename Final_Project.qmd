@@ -3,40 +3,40 @@ title: "Final Project"
 author: "Brandon Barber, Omkar Dixit"
 format: pdf
 editor: visual
+bibliography: references_fixed.bib
+csl: MLA9.csl
 execute: 
   warning: false
   message: false
   echo: false
 ---
+
 # Intoduction
+
 Soccer is one of the most popular sports in the world, being played in almost every country. Of the top leagues in the world, the Spanish *La Liga* is among the most elite. This report aims to discover which factors have the most effect on a clubs success in the top league.\
 
-Our analysis focuses on the players that make up each club and is based on these
-questions:\
+Our analysis focuses on the players that make up each club and is based on these questions:\
 
-1. Do clubs see more success from purchasing players in the offseason or
-fostering talent from their youth acaedmies?\
+1.  Do clubs see more success from purchasing players in the offseason or fostering talent from their youth acaedmies?\
 
-2. Do a team's player stastics in the FIFA 23 videogame have a relationship with how 
-the team performs in the season?\
-
+2.  Do a team's player stastics in the FIFA 23 videogame have a relationship with how the team performs in the season?\
 
 # Data Provenance
 
-### 1. Transfer and Academy Data\
-  **Source:** Transfermarkt - portal for data on soccer transfers, market values, and statistics\
-  **Use:** Collect data on offseason spending, club value, and academy trasnfers for the
-  2022/23 season
-  
-### 2. Fifa Statistics\
-  **Source:** Kaggle - dataset for all players in FIFA 23 \
-  **Use:** Gather data on the overalls and market value for each player in La Liga
-  
-### 3. La Liga Standings\
-  **Source:** ESPN - sports media company
-  **Use:** Gather data on the La Liga standings for the 2021/22 and 2022/23 seasons
-  
-  
+### 1. Transfer and Academy Data 
+
+**Source:** Transfermarkt - portal for data on soccer transfers, market values, and statistics\
+**Use:** Collect data on offseason spending, club value, and academy trasnfers for the 2022/23 season
+
+### 2. Fifa Statistics 
+
+**Source:** Kaggle - dataset for all players in FIFA 23\
+**Use:** Gather data on the overalls for each player in La Liga
+
+### 3. La Liga Standings 
+
+**Source:** ESPN - sports media company \
+**Use:** Gather data on the La Liga standings for the 2021/22 and 2022/23 seasons
 
 # League Standings {.appendix}
 
@@ -92,8 +92,7 @@ kable(standings_2023, caption = "Final LaLiga Standings for 2022-23") %>%
 
 
 ```
-
-
+[1]
 
 # Economic Value vs On Field Success in La Liga {.appendix}
 
@@ -259,13 +258,17 @@ ggplot(value_insight, aes(y= Rank,
   
   theme_minimal()
 ```
-The graph shows a relationship between higher total player value and better league performance. The two clubs ranked highest in the league are seen in the top right corner with large glyphs, possibly indicating that more spending is indictaive of better performance. 
+
+The graph shows a relationship between higher total player value and better league performance. The two clubs ranked highest in the league are seen in the top right corner with large glyphs, possibly indicating that more spending is indictaive of better performance.
 
 On the other hand, outside of the top left and bottom right corners, club value seems to show no relationship with rank, especially in the teams ranked in the bottom half of the league. Club value is calculated from a club's annual revenue and infrastructure value. This graph suggests that the players have much more of an impact on team performance than the overall wealth of the club.
 
-Upon further analysis, the overall shape of the graph is shown to be downward sloping, and the relationship between player value and rank flattens out at around €350 million. This  suggests that spending is important for smaller clubs ranked lower in the league but becomes less important for the larger clubs towards the middle and top of the league. 
+Upon further analysis, the overall shape of the graph is shown to be downward sloping, and the relationship between player value and rank flattens out at around €350 million. This suggests that spending is important for smaller clubs ranked lower in the league but becomes less important for the larger clubs towards the middle and top of the league.
+
+[1][4][5][6]
 
 # Impact of the Offseason {.appendix}
+
 Soccer clubs can acquire players by any one of three methods, a purchase of a player from another club also known as a trasnfer, a player being loaned from once club to another from a set amount of time, or training players from a young age to be eventually promoted to their first team. These plots will analyze the impact of purchasing players in the offseason on team performance versus promoting academy players.
 
 ```{r}
@@ -474,7 +477,10 @@ ggplot()+
   
   theme_minimal()
 ```
+
 The results show a lack of causation between offseason spending and performance increase. Clubs spent a relatively small amount, 30-60 million, show both improvements and declines in performance. There are also a few clubs that spend over €100 million and saw no improvement.
+
+[3][4][7]
 
 ```{r}
 #| label: academy-promotion
@@ -666,12 +672,16 @@ ggplot()+
   
   theme_minimal()
 ```
+
 Unlike the graph on offseason spending , there is a slightly stronger trend of clubs with higher numbers of academy signings showing improvement in rank. This suggests that developing players with the sole purpose of beign on the first team may lead to more success than purchasing big name players used to playing in other systems. Although a few clubs with many academy promotions declined, the overall graph shows a benefit in academy signings.
 
+[2][3][4]
 # Does FIFA Rating Help Predict Success?
-FIFA 23 is a soccer video game made by EA Sports that contains real world players, teams, and leagues. Each player is assigned an *overall* rating, which is a score from 1 to 99 based on their general skill level. The rating is based on individual attributes such as: shooting, speed, tackling, and strength. 
 
-The following plot aims to determine if the rankings of the players  in the video game, released before every season, can be used to predict a team's league performance.
+FIFA 23 is a soccer video game made by EA Sports that contains real world players, teams, and leagues. Each player is assigned an *overall* rating, which is a score from 1 to 99 based on their general skill level. The rating is based on individual attributes such as: shooting, speed, tackling, and strength.
+
+The following plot aims to determine if the rankings of the players in the video game, released before every season, can be used to predict a team's league performance.
+
 ```{r}
 #| label: fifa-ratings
 #| fig-cap: "Average FIFA 23 player rating for each La Liga club, based on mean overall ratings of all rostered players. Clubs are ordered by their final rank in the 2022/23 season, with the top representing the highest ranked team and the bottom the lowest."
@@ -754,22 +764,54 @@ ggplot(rating_standings, aes(x = Average_Overall, y = reorder(Club, -`Rank 2023`
 
 
 ```
+
 The graph exhibits a clear linear relationship between a club's average FIFA 23 player rating and its final league standing in the 2022/23 La Liga season. Clubs ranked higher in the league, such as Barcelona and Real Madrid, tend to have higher average player ratings. Conversely, teams with lower rank, such as Elche and Espanyolshow lower average ratings.
 
 This positive correlation suggests that FIFA 23 player ratings can reflect the quality of real teams, despite being part of a video game.
 
-# Conclusion
+[1][4]
+
+# Conclusion 
 This report examined key factors that can have influence on team success in La Liga, including total player market value, offseason transfer spending, academy player promotions, and FIFA 23 player ratings. The graphs showed a strong linear relationship between both total squad value and average player ratings with a team's final league ranking. Clubs like Barcelona and Real Madrid that ranked highest in both player value and average ratings, also finished at the top of the league. This suggests that roster quality is key in team success. This also showsthat FIFA’s video game ratings may reasonably reflect team strength.
 
 On the other hand, offseason transfer spending alone did not have as strong a correlation with improved performance as academy spending. Some clubs spent large amounts and declined in rank, while others, with lesser investments, improved. In contrast, clubs that promoted more players from their academies showed a pattern of improvement, suggesting that internal development of players can be both cost effective, and can lead to future success. Overall, the visuals indicate that, while financial value and player quality are important to success in La Liga, strategies like youth promotion can provide a meaningful competitive edge.
 
 # FAIR Principles
-- **Findable**: Data is all accessible by either public url or csv file\
-- **Interoperable**: Data is stored as csv files or html tables
+
+-   **Findable**: Data is all accessible by either public url or csv file\
+-   **Interoperable**: Data is stored as csv files or html tables
+
+# Works Cited
+
+1. cashncarry. *FIFA 23 Complete Player Dataset*. Kaggle, 2023.  
+   <https://www.kaggle.com/datasets/cashncarry/fifa-23-complete-player-dataset>. Accessed 15 June 2023.
+
+2. Rayhan32. *La Liga Player Status Season 2022-2023*. Kaggle, 2023.  
+   <https://www.kaggle.com/datasets/rayhan32/la-liga-player-status-season-2022-2023>. Accessed 15 June 2023.
+
+3. ESPN. *La Liga Standings - 2021/22 Season*. 2022.  
+   <https://www.espn.com/soccer/standings/_/league/ESP.1/season/2021>. Accessed 15 June 2023.
+
+4. ESPN. *La Liga Standings - 2022/23 Season*. 2023.  
+   <https://www.espn.com/soccer/standings/_/league/ESP.1/season/2022>. Accessed 15 June 2023.
+
+5. Transfermarkt. *LaLiga Market Values as of June 15, 2023*. 2023.  
+   <https://www.transfermarkt.com/laliga/marktwerteverein/wettbewerb/ES1/plus/?stichtag=2023-06-15>. Accessed 15 June 2023.
+
+6. Transfermarkt. *LaLiga2 Market Values as of July 15, 2023*. 2023.  
+   <https://www.transfermarkt.com/laliga2/marktwerteverein/wettbewerb/ES2/plus/?stichtag=2023-07-15>. Accessed 15 June 2023.
+
+7. Transfermarkt. *LaLiga Spending and Earnings - 2021/22 Season*. 2022.  
+   <https://www.transfermarkt.com/laliga/einnahmenausgaben/wettbewerb/ES1/ids/a/sa//saison_id/2021/saison_id_bis/2022/nat/0/pos//w_s//intern/0>. Accessed 15 June 2023.
+
+8. Transfermarkt. *LaLiga2 Spending and Earnings - 2021/22 Season*. 2022.  
+   <https://www.transfermarkt.us/laliga2/einnahmenausgaben/wettbewerb/ES2/plus/0?ids=a&sa=&saison_id=2021&saison_id_bis=2022>. Accessed 15 June 2023.
+
 
 # Code Appendix {.appendix}
 
 ### League Standings
+
 ```{r}
 #| ref.label: standings-22/23
 #| echo: true
@@ -777,6 +819,7 @@ On the other hand, offseason transfer spending alone did not have as strong a co
 ```
 
 ### Club and Player Value
+
 ```{r}
 #| ref.label: team-player-value
 #| echo: true
@@ -784,6 +827,7 @@ On the other hand, offseason transfer spending alone did not have as strong a co
 ```
 
 ### Offseason Spending
+
 ```{r}
 #| ref.label: offseason-purchases
 #| echo: true
@@ -791,6 +835,7 @@ On the other hand, offseason transfer spending alone did not have as strong a co
 ```
 
 ### Offseason Academy Promotion
+
 ```{r}
 #| ref.label: academy-promotion
 #| echo: true
@@ -798,8 +843,10 @@ On the other hand, offseason transfer spending alone did not have as strong a co
 ```
 
 ### Fifa Rating
+
 ```{r}
 #| ref.label: fifa-ratings
 #| echo: true
 #| eval: false
 ```
+
