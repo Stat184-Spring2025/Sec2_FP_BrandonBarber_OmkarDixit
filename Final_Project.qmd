@@ -676,6 +676,7 @@ ggplot()+
 Unlike the graph on offseason spending , there is a slightly stronger trend of clubs with higher numbers of academy signings showing improvement in rank. This suggests that developing players with the sole purpose of beign on the first team may lead to more success than purchasing big name players used to playing in other systems. Although a few clubs with many academy promotions declined, the overall graph shows a benefit in academy signings.
 
 [2][3][4]
+
 # Does FIFA Rating Help Predict Success?
 
 FIFA 23 is a soccer video game made by EA Sports that contains real world players, teams, and leagues. Each player is assigned an *overall* rating, which is a score from 1 to 99 based on their general skill level. The rating is based on individual attributes such as: shooting, speed, tackling, and strength.
