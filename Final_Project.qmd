@@ -30,7 +30,7 @@ the team performs in the season?\
   
 ### 2. Fifa Statistics\
   **Source:** Kaggle - dataset for all players in FIFA 23 \
-  **Use:** Gather data on the overalls for each player in La Liga
+  **Use:** Gather data on the overalls and market value for each player in La Liga
   
 ### 3. La Liga Standings\
   **Source:** ESPN - sports media company
